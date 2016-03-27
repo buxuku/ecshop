@@ -82,6 +82,12 @@ elseif ($_REQUEST['act'] == 'list')
     assign_query_info();
     $smarty->display('order_list.htm');
 }
+//lxd --zhuo start 订单查询导出cvs格式
+elseif($_REQUEST['order'] == 'order_export'){
+
+    export_csv($_SESSION['orders'],$_LANG['os'],$_LANG['ps'],$_LANG['ss']);
+    exit;
+}
 
 /*------------------------------------------------------ */
 //-- 排序、分页、查询
@@ -5079,6 +5085,9 @@ function order_list()
             $row[$key]['can_remove'] = 0;
         }
     }
+    //lxd modify
+    $_SESSION['orders']=$row;
+
     $arr = array('orders' => $row, 'filter' => $filter, 'page_count' => $filter['page_count'], 'record_count' => $filter['record_count']);
 
     return $arr;
@@ -6338,4 +6347,43 @@ function get_site_root_url()
     return 'http://' . $_SERVER['HTTP_HOST'] . str_replace('/' . ADMIN_PATH . '/order.php', '', PHP_SELF);
 
 }
+
+/*lxd 商家入驻*/
+function export_csv($export_list,$_lang_os,$_lang_ps,$_lang_ss) {
+
+    $filename = date('YmdHis').".csv";
+    header("Content-type:text/csv");
+    header("Content-Disposition:attachment;filename=".$filename);
+    header('Cache-Control:must-revalidate,post-check=0,pre-check=0');
+    header('Expires:0');
+    header('Pragma:public');
+    echo user_date($export_list,$_lang_os,$_lang_ps,$_lang_ss);
+}
+function user_date($result,$_lang_os,$_lang_ps,$_lang_ss) {
+    if(empty($result)) {
+        return i("没有符合您要求的数据！^_^");
+    }
+    $data = i('订单号,下单会员,下单时间,收货人,联系电话,地址,总金额,应付金额,确认状态,付款状态,发货状态'."\n");
+    $count = count($result);
+    for($i = 0 ; $i < $count ;  $i++) {
+        $order_sn = i($result[$i]['order_sn']);
+        $order_user = i($result[$i]['buyer']);
+        $order_time = i($result[$i]['short_order_time']);
+        $consignee = i($result[$i]['consignee']);
+        $tel = i($result[$i]['tel']);
+        $address = i($result[$i]['address']);
+        $formated_order_amount = i($result[$i]['formated_order_amount']);
+        $order_status = i($result[$i]['order_status']);
+        $pay_status = i($result[$i]['pay_status']);
+        $shipping_status = i($result[$i]['shipping_status']);
+        $data .= $order_sn .','. $order_user .','. $order_time .','. $consignee .','. $tel .','. $address .','.i($result[$i]['formated_total_fee']).','. $formated_order_amount .','. i($_lang_os[$order_status]).','. i($_lang_ps[$pay_status]).','. i($_lang_ss[$shipping_status]) ."\n";
+    }
+    return $data;
+}
+function i($strInput) {
+    $strInput= strip_tags($strInput);
+    return iconv('utf-8','gb2312',$strInput);//页面编码为utf-8时使用，否则导出的中文为乱码
+}
+/*lxd 商家入驻*/
+
 ?>

@@ -305,6 +305,10 @@ elseif ($_REQUEST['act'] == 'main')
     "WHERE a.sender_id = b.user_id AND a.receiver_id = '$_SESSION[admin_id]' AND ".
     "a.readed = 0 AND deleted = 0 ORDER BY a.sent_time DESC";
     $admin_msg = $db->GetAll($sql);
+foreach($admin_msg as $key=>$val)
+{
+    $admin_msg[$key]['sent_time']=local_date('Y-m-d H:i',$val['sent_time']);
+}
 
     $smarty->assign('admin_msg', $admin_msg);
 

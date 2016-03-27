@@ -90,6 +90,10 @@ if ($_REQUEST['act'] == 'list' || $_REQUEST['act'] == 'trash')
     /* 获取商品类型存在规格的类型 */
     $specifications = get_goods_type_specifications();
     $smarty->assign('specifications', $specifications);
+/*lxd 商家入驻 判断管理员是否有审核商家商品的权限*/
+    //管理员信息
+    $check_action=(strstr($_SESSION['action_list'],'check')||($_SESSION['action_list']=='all'))?1:0;
+    $smarty->assign('check_action',$check_action);
 
     /* 显示商品列表页面 */
     assign_query_info();
@@ -833,13 +837,13 @@ elseif ($_REQUEST['act'] == 'insert' || $_REQUEST['act'] == 'update')
                     "cat_id, brand_id, shop_price, market_price, is_promote, promote_price, " .
                     "promote_start_date, promote_end_date, goods_img, goods_thumb, original_img, keywords, goods_brief, " .
                     "seller_note, goods_weight, goods_number, warn_number, integral, give_integral, is_best, is_new, is_hot, " .
-                    "is_on_sale, is_alone_sale, is_shipping, goods_desc, add_time, last_update, goods_type, rank_integral, suppliers_id)" .
+                    "is_on_sale, is_alone_sale, is_shipping, goods_desc, add_time, last_update, goods_type, rank_integral, suppliers_id,seller_id)" .
                 "VALUES ('$_POST[goods_name]', '$goods_name_style', '$goods_sn', '$catgory_id', " .
                     "'$brand_id', '$shop_price', '$market_price', '$is_promote','$promote_price', ".
                     "'$promote_start_date', '$promote_end_date', '$goods_img', '$goods_thumb', '$original_img', ".
                     "'$_POST[keywords]', '$_POST[goods_brief]', '$_POST[seller_note]', '$goods_weight', '$goods_number',".
                     " '$warn_number', '$_POST[integral]', '$give_integral', '$is_best', '$is_new', '$is_hot', '$is_on_sale', '$is_alone_sale', $is_shipping, ".
-                    " '$_POST[goods_desc]', '" . gmtime() . "', '". gmtime() ."', '$goods_type', '$rank_integral', '$suppliers_id')";
+                    " '$_POST[goods_desc]', '" . gmtime() . "', '". gmtime() ."', '$goods_type', '$rank_integral', '$suppliers_id','".$_SESSION['seller_id']."'')";
         }
         else
         {
@@ -1271,6 +1275,36 @@ elseif ($_REQUEST['act'] == 'batch')
             /* 检查权限 */
             admin_priv('goods_manage');
             update_goods($goods_id, 'suppliers_id', $_POST['suppliers_id']);
+        }
+ /**
+         * 审核入驻商家添加的商品 
+         * lxd 商家入驻
+         */
+        elseif( $_POST['type'] == "check_goods"){
+             /* 检查权限 */
+            admin_priv('goods_manage');
+            $check_causes = isset( $_REQUEST['check_cause'])? $_REQUEST['check_cause'] : '';
+          
+            /**
+             * 如果审核不通过则要说明审核失败原因
+             */
+            if( $_POST['goods_check'] == 2){
+                
+                $sql = "UPDATE " .$GLOBALS['ecs'] ->table('goods') ." SET is_display = 0,check_status='".$_POST['goods_check']."',check_cause ='" .$check_causes . "'  WHERE goods_id " . db_create_in($goods_id);;
+
+                $GLOBALS['db']->query($sql);
+            }
+            
+            /**
+             * 审核通过 这让商品显示
+             */
+            if( $_POST['goods_check'] == 1){
+                
+                $sql = "UPDATE " .$GLOBALS['ecs'] ->table('goods') ." SET is_display = 1,check_status='".$_POST['goods_check']."' WHERE goods_id " . db_create_in($goods_id);;
+                $GLOBALS['db']->query($sql);
+                
+            }
+            
         }
 
         /* 还原 */

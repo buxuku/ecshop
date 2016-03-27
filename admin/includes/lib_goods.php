@@ -820,6 +820,7 @@ function goods_list($is_delete, $real_goods=1, $conditions = '')
         $today = local_mktime(23, 59, 59, $day['mon'], $day['mday'], $day['year']);
 
         $filter['cat_id']           = empty($_REQUEST['cat_id']) ? 0 : intval($_REQUEST['cat_id']);
+        $filter['seller_id']           = empty($_REQUEST['seller_id']) ? 0 : intval($_REQUEST['seller_id']);//by lxd 商家入住
         $filter['intro_type']       = empty($_REQUEST['intro_type']) ? '' : trim($_REQUEST['intro_type']);
         $filter['is_promote']       = empty($_REQUEST['is_promote']) ? 0 : intval($_REQUEST['is_promote']);
         $filter['stock_warning']    = empty($_REQUEST['stock_warning']) ? 0 : intval($_REQUEST['stock_warning']);
@@ -838,6 +839,24 @@ function goods_list($is_delete, $real_goods=1, $conditions = '')
         $filter['real_goods']       = $real_goods;
 
         $where = $filter['cat_id'] > 0 ? " AND " . get_children($filter['cat_id']) : '';
+        /*lxd 商家入驻*/
+        if(isset($_REQUEST['status'])&&intval($_REQUEST['status'])<3)
+        {
+            $where .=" and check_status=".intval($_REQUEST['status']);
+        }
+        
+        if(isset($_REQUEST['seller_id'])&&intval($_REQUEST['seller_id'])<3)
+        {
+            if(intval($_REQUEST['seller_id'])>0)
+            {
+                $where .=" and seller_id>0 ";       
+            }
+            else
+            {
+                $where .=" and seller_id=0";    
+            }
+        }
+        /*lxd 商家入驻*/
 
         /* 推荐类型 */
         switch ($filter['intro_type'])
@@ -908,7 +927,7 @@ function goods_list($is_delete, $real_goods=1, $conditions = '')
         /* 分页大小 */
         $filter = page_and_size($filter);
 
-        $sql = "SELECT goods_id, goods_name, goods_type, goods_sn, shop_price, is_on_sale, is_best, is_new, is_hot, sort_order, goods_number, integral, " .
+        $sql = "SELECT goods_id, goods_name, goods_type, goods_sn, shop_price, is_on_sale, is_best, is_new, is_hot, sort_order, goods_number, integral,check_status,check_cause,  " .
                     " (promote_price > 0 AND promote_start_date <= '$today' AND promote_end_date >= '$today') AS is_promote ".
                     " FROM " . $GLOBALS['ecs']->table('goods') . " AS g WHERE is_delete='$is_delete' $where" .
                     " ORDER BY $filter[sort_by] $filter[sort_order] ".

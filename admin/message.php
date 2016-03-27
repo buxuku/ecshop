@@ -359,7 +359,10 @@ function get_message_list()
     $row = $GLOBALS['db']->getAll($sql);
 
     foreach ($row AS $key=>$val)
-    {
+    {//lxd 商家入驻
+        $sql="select user_name from ".$GLOBALS['ecs']->table('admin_user')." where user_id='".$val['receiver_id']."'";
+        $row[$key]['receiver']=$GLOBALS['db']->getOne($sql);
+
         $row[$key]['sent_time'] = local_date($GLOBALS['_CFG']['time_format'], $val['sent_time']);
         $row[$key]['read_time'] = local_date($GLOBALS['_CFG']['time_format'], $val['read_time']);
     }

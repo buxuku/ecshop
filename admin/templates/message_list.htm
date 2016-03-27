@@ -27,6 +27,9 @@
       </th>
       <th><a href="javascript:listTable.sort('title'); ">{$lang.title}</a>{$sort_title}</th>
       <th><a href="javascript:listTable.sort('sender_id'); ">{$lang.sender_id}</a>{$sort_sender_id}</th>
+      <!--wang 商家入驻-->
+      <th>接收者</th>
+      <!--wang 商家入驻-->
       <th><a href="javascript:listTable.sort('sent_time'); ">{$lang.send_date}</a>{$sort_send_date}</th>
       <th><a href="javascript:listTable.sort('read_time'); ">{$lang.read_date}</a>{$sort_read_date}</th>
       <th>{$lang.handler}</th>
@@ -36,6 +39,9 @@
       <td><input type="checkbox" name="checkboxes[]" value="{$msg.message_id}" />{$msg.message_id}</td>
       <td class="first-cell">{$msg.title|escape:html|truncate:35}</td>
       <td>{$msg.user_name|escape:html}</td>
+      <!--wang 商家入驻-->
+      <td>{$msg.receiver}</td>
+      <!--wang 商家入驻-->
       <td align="right">{$msg.sent_time}</td>
       <td align="right">{$msg.read_time|default:N/A}</td>
       <td align="center">

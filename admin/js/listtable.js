@@ -103,7 +103,8 @@ listTable.toggle = function(obj, act, id)
 
   if (res.error == 0)
   {
-    obj.src = (res.content > 0) ? 'images/yes.gif' : 'images/no.gif';
+    //lxd 商家入驻
+    obj.src = (res.content == 1) ? 'images/yes.gif' : 'images/no.gif';
   }
 }
 

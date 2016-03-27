@@ -86,15 +86,15 @@ elseif ($_REQUEST['act'] == 'signin')
     $ec_salt =$db->getOne($sql);
     if(!empty($ec_salt))
     {
-         /* 检查密码是否正确 */
-         $sql = "SELECT user_id, user_name, password, last_login, action_list, last_login,suppliers_id,ec_salt".
+         /* 检查密码是否正确 lxd*/
+         $sql = "SELECT user_id, user_name, password, last_login, action_list, last_login,suppliers_id,ec_salt,seller_id".
             " FROM " . $ecs->table('admin_user') .
             " WHERE user_name = '" . $_POST['username']. "' AND password = '" . md5(md5($_POST['password']).$ec_salt) . "'";
     }
     else
     {
-         /* 检查密码是否正确 */
-         $sql = "SELECT user_id, user_name, password, last_login, action_list, last_login,suppliers_id,ec_salt".
+         /* 检查密码是否正确 lxd */
+         $sql = "SELECT user_id, user_name, password, last_login, action_list, last_login,suppliers_id,ec_salt,seller_id".
             " FROM " . $ecs->table('admin_user') .
             " WHERE user_name = '" . $_POST['username']. "' AND password = '" . md5($_POST['password']) . "'";
     }
@@ -110,6 +110,12 @@ elseif ($_REQUEST['act'] == 'signin')
                 sys_msg($_LANG['login_disable'], 1);
             }
         }
+        // lxd 商家入驻 检查是否为入驻商的管理员 所属入驻商家是否有效
+        if ($row['seller_id']>0)
+        {
+            sys_msg('对不起，您不是管理员，请勿擅闯禁地', 1);
+        }
+        $_SESSION['seller_id'] = $row['seller_id'];
 
         // 登录成功
         set_admin_session($row['user_id'], $row['user_name'], $row['action_list'], $row['last_login']);

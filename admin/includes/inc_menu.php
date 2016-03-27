@@ -35,6 +35,14 @@ $modules['02_cat_and_goods']['50_virtual_card_list']   = 'goods.php?act=list&ext
 $modules['02_cat_and_goods']['51_virtual_card_add']    = 'goods.php?act=add&extension_code=virtual_card';
 $modules['02_cat_and_goods']['52_virtual_card_change'] = 'virtual_card.php?act=change';
 $modules['02_cat_and_goods']['goods_auto']             = 'goods_auto.php?act=list';
+//入驻商管理 lxd 商家入驻 start
+$modules['02_seller_manage']['seller_list']         = 'user_sellers.php?act=list';//商家申请入驻的信息列表
+$modules['02_seller_manage']['021_seller_fields']   = 'seller_fields.php?act=list';// 商家注册项设置
+$modules['02_seller_manage']['seller_yongjin']   = 'seller_commission.php?act=list';// 佣金列表
+$modules['02_seller_manage']['store_category']   = 'store_category.php?act=list';// 店铺分类
+$modules['02_seller_manage']['store_manege']   = 'store_manege.php?act=list';// 商家店铺管理
+$modules['02_seller_manage']['street_tags_manege']   = 'street_tags_manege.php?act=list';// 店铺街标签管理
+//入驻商管理 lxd 商家入驻 end
 
 
 $modules['03_promotion']['02_snatch_list']          = 'snatch.php?act=list';

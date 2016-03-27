@@ -15,7 +15,9 @@
       {/if}
       <!-- 上架 -->
       <select name="is_on_sale"><option value=''>{$lang.intro_type}</option><option value="1">{$lang.on_sale}</option><option value="0">{$lang.not_on_sale}</option></select>
+      <select name="status"><option value="3">选择审核状态</option><option value="0">未审核</option><option value="1">审核通过</option><option value="2">审核未通过</option></select> 
     {/if}
+    <select name="seller_id"><option value="3">选择商家</option><option value="0">自营商品</option><option value="1">商家商品</option></select>
     <!-- 关键字 -->
     {$lang.keyword} <input type="text" name="keyword" size="15" />
     <input type="submit" value="{$lang.button_search}" class="button" />
@@ -35,8 +37,10 @@
           listTable.filter['suppliers_id'] = document.forms['searchForm'].elements['suppliers_id'].value;
           {/if}
         listTable.filter['is_on_sale'] = document.forms['searchForm'].elements['is_on_sale'].value;
+        listTable.filter['status'] = document.forms['searchForm'].elements['status'].value;
         {/if}
 {literal}
+        listTable.filter['seller_id'] = document.forms['searchForm'].elements['seller_id'].value;
         listTable.filter['keyword'] = Utils.trim(document.forms['searchForm'].elements['keyword'].value);
         listTable.filter['page'] = 1;
 

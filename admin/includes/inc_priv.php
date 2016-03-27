@@ -36,9 +36,21 @@ if (!defined('IN_ECS'))
     $purview['51_virtual_card_add']  = 'virualcard';
     $purview['52_virtual_card_change'] = 'virualcard';
     $purview['goods_auto']           = 'goods_auto';
+/*lxd 商家入驻*/
+    $purview['check'] = 'check'; //审核商家商品信息
+    /*lxd 商家入驻*/
 
 //促销管理权限
     $purview['02_snatch_list']       = 'snatch_manage';
+    //入驻商家管理权限 lxd 商家入驻 start
+    $purview['021_seller_fields']       = 'seller_fields'; // 商家注册项设置
+    $purview['seller_list']          = 'seller_manage'; // 商家列表管理权限
+    $purview['seller_yongjin']          = 'seller_yj_manage'; // 商家列表管理权限
+    $purview['store_category']='store_cate_manage';//商家店铺分类管理权限
+    $purview['store_manege']='store_manege';//商家店铺管理
+    $purview['street_tags_manege']='street_tags_manege';//店铺街标签管理
+    //lxd 商家入驻 end
+
     $purview['04_bonustype_list']    = 'bonus_manage';
     $purview['06_pack_list']         = 'pack';
     $purview['07_card_list']         = 'card_manage';
