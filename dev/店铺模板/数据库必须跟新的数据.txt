@@ -1,0 +1,2 @@
+UPDATE `ecs_seller_shopwindow` SET `seller_theme`='store_tpl_1' WHERE 1;
+UPDATE `ecs_seller_shopinfo` SET `seller_theme`='store_tpl_1' WHERE 1

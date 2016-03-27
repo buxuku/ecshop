@@ -1,0 +1,7 @@
+ALTER TABLE `ecs_seller_shopinfo` ADD `seller_theme` VARCHAR( 50 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL;
+
+ALTER TABLE `ecs_seller_shopwindow` ADD `seller_theme` VARCHAR( 50 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL;
+
+ALTER TABLE `ecs_seller_shopinfo` ADD `store_style` VARCHAR( 50 ) NOT NULL
+
+ALTER TABLE `ecs_seller_shopslide` ADD `seller_theme` VARCHAR( 50 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL 

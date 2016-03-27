@@ -1,0 +1,4 @@
+
+将下面的链接放到合适的地方{if $action eq 'sellers_info'}selected{/if}这个是用于判断样式的，可根据实际模板灵活运用
+
+<a href="sellers.php" class="track {if $action eq 'sellers_info'}selected{/if}">我的入驻信息</a>
