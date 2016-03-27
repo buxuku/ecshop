@@ -861,6 +861,18 @@ function get_children($cat = 0)
 }
 
 /**
+ * 获得入驻商家指定分类下所有底层分类的ID
+ *
+ * @access  public
+ * @param   integer     $cat        指定的分类ID
+ * @return  string
+ */
+function get_seller_children($cat = 0)
+{
+    return 'g.seller_cat_id ' . db_create_in(array_unique(array_merge(array($cat), array_keys(seller_cat_list($cat, 0, false)))));
+}
+
+/**
  * 获得指定文章分类下所有底层分类的ID
  *
  * @access  public
@@ -1493,13 +1505,94 @@ function build_uri($app, $params, $append = '', $page = 0, $keywords = '', $size
                   'auid'  => 0,
                   'sort'  => '',
                   'order' => '',
+                  'price_min'=>'',
+                  'price_max'=>'',
+                  'filter_attr'=>''
                 );
+
 
     extract(array_merge($args, $params));
 
     $uri = '';
     switch ($app)
     {
+//lxd 商家入驻 start
+        case 'seller_goods':
+
+            if (empty($sid))
+            {
+                return false;
+            }
+            else
+            {
+                if ($rewrite)
+                {
+                    $uri = 'seller_goods-' . $sid;
+                    if (isset($cid))
+                    {
+                        $uri .= '-c' . $cid;
+                    }
+                    if (isset($price_min))
+                    {
+                        $uri .= '-min'.$price_min;
+                    }
+                    if (isset($price_max))
+                    {
+                        $uri .= '-max'.$price_max;
+                    }
+                    if (isset($filter_attr))
+                    {
+                        $uri .= '-attr' . $filter_attr;
+                    }
+                    if (!empty($page))
+                    {
+                        $uri .= '-' . $page;
+                    }
+                    if (!empty($sort))
+                    {
+                        $uri .= '-' . $sort;
+                    }
+                    if (!empty($order))
+                    {
+                        $uri .= '-' . $order;
+                    }
+                }
+                else
+                {
+                    $uri = 'seller_goods.php?sid=' . $sid;
+                    if (!empty($cid))
+                    {
+                        $uri .= '&amp;cid=' . $cid;
+                    }
+                    if (isset($price_min))
+                    {
+                        $uri .= '&amp;price_min=' . $price_min;
+                    }
+                    if (isset($price_max))
+                    {
+                        $uri .= '&amp;price_max=' . $price_max;
+                    }
+                    if (!empty($filter_attr))
+                    {
+                        $uri .='&amp;filter_attr=' . $filter_attr;
+                    }
+
+                    if (!empty($page))
+                    {
+                        $uri .= '&amp;page=' . $page;
+                    }
+                    if (!empty($sort))
+                    {
+                        $uri .= '&amp;sort=' . $sort;
+                    }
+                    if (!empty($order))
+                    {
+                        $uri .= '&amp;order=' . $order;
+                    }
+                }
+            }
+            break;//lxd 商家入驻 end
+
         case 'category':
             if (empty($cid))
             {
@@ -2778,5 +2871,328 @@ if (!function_exists('array_combine')) {
         return $combined;
     }
 }
+
+/**
+ * 获得指定分类下的子分类的数组
+ *
+ * @access  public
+ * @param   int     $cat_id     分类的ID
+ * @param   int     $selected   当前选中分类的ID
+ * @param   boolean $re_type    返回的类型: 值为真时返回下拉列表,否则返回数组
+ * @param   int     $level      限定返回的级数。为0时返回所有级数
+ * @param   int     $is_show_all 如果为true显示所有分类，如果为false隐藏不可见分类。
+ * @return  mix
+ */
+function seller_cat_list($cat_id = 0, $selected = 0, $re_type = true, $level = 0, $is_show_all = true)
+{
+    static $res = NULL;
+
+    if ($res === NULL)
+    {
+        $data = read_static_cache('seller_cat_pid_releate_'.$_SESSION['seller_id']);
+        if ($data === false)
+        {
+            $sql = "SELECT c.seller_cat_id, c.cat_name, c.measure_unit, c.parent_id, c.is_show, c.show_in_nav, c.grade, c.sort_order, COUNT(s.seller_cat_id) AS has_children ".
+                'FROM ' . $GLOBALS['ecs']->table('seller_category') . " AS c ".
+                "LEFT JOIN " . $GLOBALS['ecs']->table('seller_category') . " AS s ON s.parent_id=c.seller_cat_id  where c.seller_id='".$_SESSION['seller_id']."' ".
+                "GROUP BY c.seller_cat_id ".
+                'ORDER BY c.parent_id, c.sort_order ASC';
+            
+            $res = $GLOBALS['db']->getAll($sql);
+
+            $sql = "SELECT seller_cat_id, COUNT(*) AS goods_num " .
+                    " FROM " . $GLOBALS['ecs']->table('goods') .
+                    " WHERE is_delete = 0 AND is_on_sale = 1 and seller_cat_id<>0 " .
+                    " GROUP BY seller_cat_id";
+            $res2 = $GLOBALS['db']->getAll($sql);
+            
+            $sql = "SELECT gc.seller_cat_id, COUNT(*) AS goods_num FROM " . $GLOBALS['ecs']->table('goods_cat') . " AS gc , " . $GLOBALS['ecs']->table('goods') . " AS g " .
+                    " WHERE g.goods_id = gc.goods_id AND g.is_delete = 0 AND g.is_on_sale = 1 and g.seller_id='".$SESSION['seller_id'].
+                    "' GROUP BY gc.seller_cat_id";
+            $res3 = $GLOBALS['db']->getAll($sql);
+
+            $newres = array();
+            foreach($res2 as $k=>$v)
+            {
+                $newres[$v['seller_cat_id']] = $v['goods_num'];
+                foreach($res3 as $ks=>$vs)
+                {
+                    if($v['seller_cat_id'] == $vs['seller_cat_id'])
+                    {
+                    $newres[$v['seller_cat_id']] = $v['goods_num'] + $vs['goods_num'];
+                    }
+                }
+            }
+
+            foreach($res as $k=>$v)
+            {
+                $res[$k]['goods_num'] = !empty($newres[$v['seller_cat_id']]) ? $newres[$v['seller_cat_id']] : 0;
+            }
+            
+            //如果数组过大，不采用静态缓存方式
+            if (count($res) <= 1000)
+            {
+                write_static_cache('seller_cat_pid_releate_'.$_SESSION['seller_id'], $res);
+            }
+        }
+        else
+        {
+            $res = $data;
+        }
+    }
+
+    if (empty($res) == true)
+    {
+        return $re_type ? '' : array();
+    }
+
+    $options = seller_cat_options($cat_id, $res); // 获得指定分类下的子分类的数组
+
+    $children_level = 99999; //大于这个分类的将被删除
+    if ($is_show_all == false)
+    {
+        foreach ($options as $key => $val)
+        {
+            if ($val['level'] > $children_level)
+            {
+                unset($options[$key]);
+            }
+            else
+            {
+                if ($val['is_show'] == 0)
+                {
+                    unset($options[$key]);
+                    if ($children_level > $val['level'])
+                    {
+                        $children_level = $val['level']; //标记一下，这样子分类也能删除
+                    }
+                }
+                else
+                {
+                    $children_level = 99999; //恢复初始值
+                }
+            }
+        }
+    }
+
+    /* 截取到指定的缩减级别 */
+    if ($level > 0)
+    {
+        if ($cat_id == 0)
+        {
+            $end_level = $level;
+        }
+        else
+        {
+            $first_item = reset($options); // 获取第一个元素
+            $end_level  = $first_item['level'] + $level;
+        }
+
+        /* 保留level小于end_level的部分 */
+        foreach ($options AS $key => $val)
+        {
+            if ($val['level'] >= $end_level)
+            {
+                unset($options[$key]);
+            }
+        }
+    }
+
+    if ($re_type == true)
+    {
+        $select = '';
+        foreach ($options AS $var)
+        {
+            $select .= '<option value="' . $var['seller_cat_id'] . '" ';
+            $select .= ($selected == $var['seller_cat_id']) ? "selected='ture'" : '';
+            $select .= '>';
+            if ($var['level'] > 0)
+            {
+                $select .= str_repeat('&nbsp;', $var['level'] * 4);
+            }
+            $select .= htmlspecialchars(addslashes($var['cat_name']), ENT_QUOTES) . '</option>';
+        }
+
+        return $select;
+    }
+    else
+    {
+        foreach ($options AS $key => $value)
+        {
+            $options[$key]['url'] = build_uri('category', array('cid' => $value['seller_cat_id']), $value['cat_name']);
+        }
+        
+        return $options;
+    }
+}
+
+/**
+ * 过滤和排序所有分类，返回一个带有缩进级别的数组
+ *
+ * @access  private
+ * @param   int     $cat_id     上级分类ID
+ * @param   array   $arr        含有所有分类的数组
+ * @param   int     $level      级别
+ * @return  void
+ */
+function seller_cat_options($spec_cat_id, $arr)
+{
+    static $cat_options = array();
+
+    if (isset($cat_options[$spec_cat_id]))
+    {
+        return $cat_options[$spec_cat_id];
+    }
+
+    if (!isset($cat_options[0]))
+    {
+        $level = $last_cat_id = 0;
+        $options = $cat_id_array = $level_array = array();
+        $data = read_static_cache('seller_cat_option_static'.$_SESSION['seller_id']);
+        if ($data === false)
+        {
+            while (!empty($arr))
+            {
+                foreach ($arr AS $key => $value)
+                {
+                    $cat_id = $value['seller_cat_id'];
+                    if ($level == 0 && $last_cat_id == 0)
+                    {
+                        if ($value['parent_id'] > 0)
+                        {
+                            break;
+                        }
+
+                        $options[$cat_id]          = $value;
+                        $options[$cat_id]['level'] = $level;
+                        $options[$cat_id]['id']    = $cat_id;
+                        $options[$cat_id]['name']  = $value['cat_name'];
+                        unset($arr[$key]);
+
+                        if ($value['has_children'] == 0)
+                        {
+                            continue;
+                        }
+                        $last_cat_id  = $cat_id;
+                        $cat_id_array = array($cat_id);
+                        $level_array[$last_cat_id] = ++$level;
+                        continue;
+                    }
+
+                    if ($value['parent_id'] == $last_cat_id)
+                    {
+                        $options[$cat_id]          = $value;
+                        $options[$cat_id]['level'] = $level;
+                        $options[$cat_id]['id']    = $cat_id;
+                        $options[$cat_id]['name']  = $value['cat_name'];
+                        unset($arr[$key]);
+
+                        if ($value['has_children'] > 0)
+                        {
+                            if (end($cat_id_array) != $last_cat_id)
+                            {
+                                $cat_id_array[] = $last_cat_id;
+                            }
+                            $last_cat_id    = $cat_id;
+                            $cat_id_array[] = $cat_id;
+                            $level_array[$last_cat_id] = ++$level;
+                        }
+                    }
+                    elseif ($value['parent_id'] > $last_cat_id)
+                    {
+                        break;
+                    }
+                }
+
+                $count = count($cat_id_array);
+                if ($count > 1)
+                {
+                    $last_cat_id = array_pop($cat_id_array);
+                }
+                elseif ($count == 1)
+                {
+                    if ($last_cat_id != end($cat_id_array))
+                    {
+                        $last_cat_id = end($cat_id_array);
+                    }
+                    else
+                    {
+                        $level = 0;
+                        $last_cat_id = 0;
+                        $cat_id_array = array();
+                        continue;
+                    }
+                }
+
+                if ($last_cat_id && isset($level_array[$last_cat_id]))
+                {
+                    $level = $level_array[$last_cat_id];
+                }
+                else
+                {
+                    $level = 0;
+                }
+            }
+            //如果数组过大，不采用静态缓存方式
+            if (count($options) <= 2000)
+            {
+                write_static_cache('seller_cat_option_static'.$_SESSION['seller_id'], $options);
+            }
+        }
+        else
+        {
+            $options = $data;
+        }
+        $cat_options[0] = $options;
+    }
+    else
+    {
+        $options = $cat_options[0];
+    }
+
+    if (!$spec_cat_id)
+    {
+        return $options;
+    }
+    else
+    {
+        if (empty($options[$spec_cat_id]))
+        {
+            return array();
+        }
+
+        $spec_cat_id_level = $options[$spec_cat_id]['level'];
+
+        foreach ($options AS $key => $value)
+        {
+            if ($key != $spec_cat_id)
+            {
+                unset($options[$key]);
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        $spec_cat_id_array = array();
+        foreach ($options AS $key => $value)
+        {
+            if (($spec_cat_id_level == $value['level'] && $value['seller_cat_id'] != $spec_cat_id) ||
+                ($spec_cat_id_level > $value['level']))
+            {
+                break;
+            }
+            else
+            {
+                $spec_cat_id_array[$key] = $value;
+            }
+        }
+        $cat_options[$spec_cat_id] = $spec_cat_id_array;
+
+        return $spec_cat_id_array;
+    }
+}
+
 
 ?>

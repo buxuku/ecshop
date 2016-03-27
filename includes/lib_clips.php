@@ -292,9 +292,9 @@ function get_booking_list($user_id, $num, $start)
 function get_goodsinfo($goods_id)
 {
     $info = array();
-    $sql  = "SELECT goods_name FROM " .$GLOBALS['ecs']->table('goods'). " WHERE goods_id = '$goods_id'";
+    $sql  = "SELECT goods_name,seller_id FROM " .$GLOBALS['ecs']->table('goods'). " WHERE goods_id = '$goods_id'";
 
-    $info['goods_name']   = $GLOBALS['db']->getOne($sql);
+    $info=$GLOBALS['db']->getRow($sql);
     $info['goods_number'] = 1;
     $info['id']           = $goods_id;
 
@@ -341,7 +341,7 @@ function add_booking($booking)
     $sql = "INSERT INTO " .$GLOBALS['ecs']->table('booking_goods').
             " VALUES ('', '$_SESSION[user_id]', '$booking[email]', '$booking[linkman]', ".
                 "'$booking[tel]', '$booking[goods_id]', '$booking[desc]', ".
-                "'$booking[goods_amount]', '".gmtime()."', 0, '', 0, '')";
+                "'$booking[goods_amount]', '".gmtime()."', 0, '', 0, '','$booking[seller_id]')";
     $GLOBALS['db']->query($sql) or die ($GLOBALS['db']->errorMsg());
 
     return $GLOBALS['db']->insert_id();

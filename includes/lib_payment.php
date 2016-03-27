@@ -151,14 +151,14 @@ function order_paid($log_id, $pay_status = PS_PAYED, $note = '')
         {
             /* 修改此次支付操作的状态为已付款 */
             $sql = 'UPDATE ' . $GLOBALS['ecs']->table('pay_log') .
-                    " SET is_paid = '1' WHERE log_id = '$log_id'";
+                    " SET is_paid = '1' WHERE log_id = '$log_id' or parent_log_id='$log_id'";//wang 商家分单支付日志
             $GLOBALS['db']->query($sql);
 
             /* 根据记录类型做相应处理 */
             if ($pay_log['order_type'] == PAY_ORDER)
             {
                 /* 取得订单信息 */
-                $sql = 'SELECT order_id, user_id, order_sn, consignee, address, tel, shipping_id, extension_code, extension_id, goods_amount ' .
+                $sql = 'SELECT order_id, user_id, order_sn, consignee, address, tel,mobile, shipping_id, extension_code, extension_id, goods_amount ' .
                         'FROM ' . $GLOBALS['ecs']->table('order_info') .
                        " WHERE order_id = '$pay_log[order_id]'";
                 $order    = $GLOBALS['db']->getRow($sql);
@@ -173,7 +173,7 @@ function order_paid($log_id, $pay_status = PS_PAYED, $note = '')
                                 " pay_time = '".gmtime()."', " .
                                 " money_paid = order_amount," .
                                 " order_amount = 0 ".
-                       "WHERE order_id = '$order_id'";
+                       "WHERE order_id = '$order_id' or parent_order_id='$order_id'";//lxd 商家入驻分单付款
                 $GLOBALS['db']->query($sql);
 
                 /* 记录订单操作记录 */
@@ -185,7 +185,7 @@ function order_paid($log_id, $pay_status = PS_PAYED, $note = '')
                     include_once(ROOT_PATH.'includes/cls_sms.php');
                     $sms = new sms();
                     $sms->send($GLOBALS['_CFG']['sms_shop_mobile'],
-                        sprintf($GLOBALS['_LANG']['order_payed_sms'], $order_sn, $order['consignee'], $order['tel']),'', 13,1);
+                        sprintf($GLOBALS['_LANG']['order_payed_sms'], $order_sn, $order['consignee'], $order['tel']?$order['tel']:$order['mobile']),'', 13,1);
                 }
 
                 /* 对虚拟商品的支持 */
@@ -204,7 +204,7 @@ function order_paid($log_id, $pay_status = PS_PAYED, $note = '')
                         /* 将订单标识为已发货状态，并记录发货记录 */
                         $sql = 'UPDATE ' . $GLOBALS['ecs']->table('order_info') .
                                " SET shipping_status = '" . SS_SHIPPED . "', shipping_time = '" . gmtime() . "'" .
-                               " WHERE order_id = '$order_id'";
+                               " WHERE order_id = '$order_id' or parent_order_id='$order_id'";//lxd 商家入驻分单付款
                         $GLOBALS['db']->query($sql);
 
                          /* 记录订单操作记录 */

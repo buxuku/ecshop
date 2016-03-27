@@ -542,7 +542,7 @@ function order_weight_price($order_id)
  * @param   bool    $is_gb_deposit  是否团购保证金（如果是，应付款金额只计算商品总额和支付费用，可以获得的积分取 $gift_integral）
  * @return  array
  */
-function order_fee($order, $goods, $consignee)
+function order_fee($order, $goods, $consignee,$order_counts=1)
 {
     /* 初始化订单的扩展code */
     if (!isset($order['extension_code']))
@@ -703,6 +703,7 @@ function order_fee($order, $goods, $consignee)
     }
 
     $total['shipping_fee_formated']    = price_format($total['shipping_fee'], false);
+    $total['shipping_totelfee_formated']    = price_format($total['shipping_fee']*$order_counts, false);//lxd 商家入驻
     $total['shipping_insure_formated'] = price_format($total['shipping_insure'], false);
 
     // 购物车中的商品能享受红包支付的总额
@@ -717,8 +718,9 @@ function order_fee($order, $goods, $consignee)
     }
     else
     {
+        //lxd 商家入驻
         $total['amount'] = $total['goods_price'] - $total['discount'] + $total['tax'] + $total['pack_fee'] + $total['card_fee'] +
-            $total['shipping_fee'] + $total['shipping_insure'] + $total['cod_fee'];
+            $total['shipping_fee']*$order_counts + $total['shipping_insure'] + $total['cod_fee'];
 
         // 减去红包金额
         $use_bonus        = min($total['bonus'], $max_amount); // 实际减去的红包金额
@@ -1018,7 +1020,7 @@ function addto_cart($goods_id, $num = 1, $spec = array(), $parent = 0)
     $sql = "SELECT g.goods_name, g.goods_sn, g.is_on_sale, g.is_real, ".
                 "g.market_price, g.shop_price AS org_price, g.promote_price, g.promote_start_date, ".
                 "g.promote_end_date, g.goods_weight, g.integral, g.extension_code, ".
-                "g.goods_number, g.is_alone_sale, g.is_shipping,".
+                "g.goods_number, g.is_alone_sale, g.is_shipping,g.seller_id,".
                 "IFNULL(mp.user_price, g.shop_price * '$_SESSION[discount]') AS shop_price ".
             " FROM " .$GLOBALS['ecs']->table('goods'). " AS g ".
             " LEFT JOIN " . $GLOBALS['ecs']->table('member_price') . " AS mp ".
@@ -1125,7 +1127,8 @@ function addto_cart($goods_id, $num = 1, $spec = array(), $parent = 0)
         'extension_code'=> $goods['extension_code'],
         'is_gift'       => 0,
         'is_shipping'   => $goods['is_shipping'],
-        'rec_type'      => CART_GENERAL_GOODS
+        'rec_type'      => CART_GENERAL_GOODS,
+        'seller_id'     =>$goods['seller_id']
     );
 
     /* 如果该配件在添加为基本件的配件时，所设置的“配件价格”比原价低，即此配件在价格上提供了优惠， */
@@ -2994,4 +2997,89 @@ function judge_package_stock($package_id, $package_num = 1)
 
     return false;
 }
+
+/*lxd 商家入驻*/
+
+/**
+ * 取得购物车不同商家的商品
+ * @param   int     $type   类型：默认普通商品
+ * @return  array   购物车商品数组
+ */
+
+function cart_sup_goods($type = CART_GENERAL_GOODS)
+{
+
+    //获取购物车不同的商家
+
+    $sql="select distinct seller_id from ".$GLOBALS['ecs']->table('cart')." WHERE session_id = '" . SESS_ID . "' " .
+
+            "AND rec_type = '$type'";
+
+    $sellers = $GLOBALS['db']->getAll($sql);
+
+
+
+    $cart_sup_goods=array();
+
+    foreach($sellers as $seller)
+
+    {
+
+        $sql = "SELECT c.rec_id, c.user_id, c.goods_id, c.goods_name, c.goods_sn, c.goods_number,g.goods_thumb, " .
+
+            "c.market_price, c.goods_price, c.goods_attr, c.is_real, c.extension_code, c.parent_id, c.is_gift, c.is_shipping, " .
+
+            "c.goods_price * c.goods_number AS subtotal " .
+
+            "FROM " . $GLOBALS['ecs']->table('cart') ." as c left join ".$GLOBALS['ecs']->table('goods').
+
+            " as g on c.goods_id=g.goods_id WHERE c.session_id = '" . SESS_ID . "' " .
+
+            "AND c.rec_type = '$type' and c.seller_id='".$seller['seller_id']."'";
+
+
+
+
+
+        $arr = $GLOBALS['db']->getAll($sql);
+
+        
+
+        /* 格式化价格及礼包商品 */
+
+        foreach ($arr as $key => $value)
+
+        {
+
+            $arr[$key]['formated_market_price'] = price_format($value['market_price'], false);
+
+            $arr[$key]['formated_goods_price']  = price_format($value['goods_price'], false);
+
+            $arr[$key]['formated_subtotal']     = price_format($value['subtotal'], false);
+
+    
+
+            if ($value['extension_code'] == 'package_buy')
+
+            {
+
+                $arr[$key]['package_goods_list'] = get_package_goods($value['goods_id']);
+
+            }
+
+        }
+
+        $cart_sup_goods[$seller['seller_id']]=$arr;
+
+    }       
+
+    
+
+    return $cart_sup_goods;
+
+}
+
+/*lxd 商家入驻*/
+
+
 ?>
