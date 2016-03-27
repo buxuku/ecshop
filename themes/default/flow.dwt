@@ -50,57 +50,41 @@
               <th bgcolor="#ffffff">{$lang.subtotal}</th>
               <th bgcolor="#ffffff">{$lang.handle}</th>
             </tr>
-            <!-- {foreach from=$goods_list item=goods} -->
-            <tr>
-              <td bgcolor="#ffffff" align="center">
-                <!-- {if $goods.goods_id gt 0 && $goods.extension_code neq 'package_buy'} 商品 -->
-                  <!-- {if $show_goods_thumb eq 1} -->
-                    <a href="goods.php?id={$goods.goods_id}" target="_blank" class="f6">{$goods.goods_name}</a>
-                  <!-- {elseif $show_goods_thumb eq 2} -->
-                    <a href="goods.php?id={$goods.goods_id}" target="_blank"><img src="{$goods.goods_thumb}" border="0" title="{$goods.goods_name|escape:html}" /></a>
-                  <!-- {else} -->
-                    <a href="goods.php?id={$goods.goods_id}" target="_blank"><img src="{$goods.goods_thumb}" border="0" title="{$goods.goods_name|escape:html}" /></a><br />
-                    <a href="goods.php?id={$goods.goods_id}" target="_blank" class="f6">{$goods.goods_name}</a>
-                  <!-- {/if} -->
-                  <!-- {if $goods.parent_id gt 0} 配件 -->
-                  <span style="color:#FF0000">（{$lang.accessories}）</span>
-                  <!-- {/if} -->
-                  <!-- {if $goods.is_gift gt 0} 赠品 -->
-                  <span style="color:#FF0000">（{$lang.largess}）</span>
-                  <!-- {/if} -->
-                <!-- {elseif $goods.goods_id gt 0 && $goods.extension_code eq 'package_buy'} -->
-                  <a href="javascript:void(0)" onclick="setSuitShow({$goods.goods_id})" class="f6">{$goods.goods_name}<span style="color:#FF0000;">（{$lang.remark_package}）</span></a>
-                  <div id="suit_{$goods.goods_id}" style="display:none">
-                      <!-- {foreach from=$goods.package_goods_list item=package_goods_list} -->
-                        <a href="goods.php?id={$package_goods_list.goods_id}" target="_blank" class="f6">{$package_goods_list.goods_name}</a><br />
-                      <!-- {/foreach} -->
-                  </div>
-                <!-- {else} 优惠活动 -->
-                  {$goods.goods_name}
+            {foreach from=$seller_cart item=cart}
+            <tr class="item-header"><td colspan="5">{if $cart.seller}<a href="seller_store.php?sid={$cart.seller.id}">{$cart.seller.shop_name}</a>{else}网站自营{/if}&nbsp;&nbsp;|&nbsp;&nbsp;运费:<span style="color:#F00;">{$total.shipping_fee_formated}</span></tr>
+            <!-- {foreach from=$cart.goods_list item=goods} -->
+            <tr class="review-tbody">
+              <td width="400" class="meiti">
+              <a href="goods.php?id={$goods.goods_id}" target="_blank"><img src="{$goods.goods_thumb}" /></a>
+              <div class="hd-nr">
+              <!-- {if $goods.goods_id gt 0 && $goods.extension_code eq 'package_buy'} -->
+              <a href="javascript:void(0)" onclick="setSuitShow({$goods.goods_id})" class="f6">{$goods.goods_name}<span style="color:#FF0000;">（{$lang.remark_package}）</span></a>
+              <div id="suit_{$goods.goods_id}" style="display:none">
+              <!-- {foreach from=$goods.package_goods_list item=package_goods_list} -->
+              <a href="goods.php?id={$package_goods_list.goods_id}" target="_blank" class="f6">{$package_goods_list.goods_name}</a><br />
+              <!-- {/foreach} -->
+              </div>
+              </div>
+          <!-- { else } -->
+          <a href="goods.php?id={$goods.goods_id}" target="_blank" class="f6">{$goods.goods_name}</a>
+                <!-- {if $goods.parent_id > 0} -->
+                <span style="color:#FF0000">（{$lang.accessories}）</span>
+                <!-- {elseif $goods.is_gift} -->
+                <span style="color:#FF0000">（{$lang.largess}）</span>
                 <!-- {/if} -->
+          <!-- {/if} -->
+          <!-- {if $goods.is_shipping} -->(<span style="color:#FF0000">{$lang.free_goods}</span>)<!-- {/if} -->
               </td>
-              <!-- {if $show_goods_attribute eq 1} 显示商品属性 -->
-              <td bgcolor="#ffffff">{$goods.goods_attr|nl2br}</td>
+              <!-- {if $show_marketprice} -->
+              <td width="98" bgcolor="#ffffff">{$goods.formated_market_price}</td>
               <!-- {/if} -->
-              <!-- {if $show_marketprice} 显示市场价 -->
-              <td align="right" bgcolor="#ffffff">{$goods.market_price}</td>
-              <!-- {/if} -->
-              <td align="right" bgcolor="#ffffff">{$goods.goods_price}</td>
-              <td align="right" bgcolor="#ffffff">
-                <!-- {if $goods.goods_id gt 0 && $goods.is_gift eq 0 && $goods.parent_id eq 0} 普通商品可修改数量 -->
-                <input type="text" name="goods_number[{$goods.rec_id}]" id="goods_number_{$goods.rec_id}" value="{$goods.goods_number}" size="4" class="inputBg" style="text-align:center " onkeydown="showdiv(this)"/>
-                <!-- {else} -->
-                {$goods.goods_number}
-                <!-- {/if} -->
-              </td>
-              <td align="right" bgcolor="#ffffff">{$goods.subtotal}</td>
-              <td align="center" bgcolor="#ffffff">
-                <a href="javascript:if (confirm('{$lang.drop_goods_confirm}')) location.href='flow.php?step=drop_goods&amp;id={$goods.rec_id}'; " class="f6">{$lang.drop}</a>
-                <!-- {if $smarty.session.user_id gt 0 && $goods.extension_code neq 'package_buy'} 如果登录了，可以加入收藏 -->
-                <a href="javascript:if (confirm('{$lang.drop_goods_confirm}')) location.href='flow.php?step=drop_to_collect&amp;id={$goods.rec_id}'; " class="f6">{$lang.drop_to_collect}</a>
-                <!-- {/if} -->            </td>
+              <td width="98" class="price">{$goods.formated_goods_price}</td>
+              <td width="58">{$goods.goods_number}</td>
+              <td width="96" class="price">{$goods.formated_subtotal}<br /></td>
             </tr>
             <!-- {/foreach} -->
+            {/foreach}
+
           </table>
           <table width="99%" align="center" border="0" cellpadding="5" cellspacing="1" bgcolor="#dddddd">
             <tr>
@@ -649,21 +633,25 @@
 
         <!-- {if $step eq "done"} -->
         <!-- 订单提交成功 -->
-        <div class="flowBox" style="margin:30px auto 70px auto;">
-         <h6 style="text-align:center; height:30px; line-height:30px;">{$lang.remember_order_number}: <font style="color:red">{$order.order_sn}</font></h6>
-          <table width="99%" align="center" border="0" cellpadding="15" cellspacing="0" bgcolor="#fff" style="border:1px solid #ddd; margin:20px auto;" >
+        <div class="flowBox subOrder">
+         <div class="subTitle">感谢您在本店购物！您的订单已提交成功!</div>
+         {if $order_count>1}
+         <div class="subDesc"><span>由于您的商品由不同的商家发出，此订单将分为<em>{$order_count}</em>个不同的子订单配送：</span></div>
+         {/if}
+          <table width="99%" align="center" border="0">
+          {foreach from=$orders item=order key=seller_id}
             <tr>
-              <td align="center" bgcolor="#FFFFFF">
-              <!--{if $order.shipping_name}-->{$lang.select_shipping}: <strong>{$order.shipping_name}</strong>，<!--{/if}-->{$lang.select_payment}: <strong>{$order.pay_name}</strong>。{$lang.order_amount}: <strong>{$total.amount_formated}</strong>
+              <td>订单号：{$order.order_sn}</td>
+              <td>
+              <!--{if $order.shipping_name}-->{$lang.select_shipping}: <strong>{$order.shipping_name}</strong>，<!--{/if}-->{$lang.select_payment}:<strong>{$order.pay_name}</strong>,{$lang.order_amount}: <strong>{$order.format_order_amount}</strong>
               </td>
+              <td></td>
             </tr>
-            <tr>
-              <td align="center" bgcolor="#FFFFFF">{$order.pay_desc}</td>
-            </tr>
-            <!-- {if $pay_online} -->
+           {/foreach}
+      <!-- {if $pay_online} -->
             <!-- 如果是线上支付则显示支付按钮 -->
             <tr>
-              <td align="center" bgcolor="#FFFFFF">{$pay_online}</td>
+              <td align="center" colspan="3" bgcolor="#FFFFFF">{$pay_online}</td>
             </tr>
             <!-- {/if} -->
           </table>
@@ -690,9 +678,10 @@
           <!--{/foreach}-->
           </div>
           <!--{/if}-->
-          <p style="text-align:center; margin-bottom:20px;">{$order_submit_back}</p>
+          <p class="returngw">{$order_submit_back}</p>
         </div>
         <!-- {/if} -->
+
         <!-- {if $step eq "login"} -->
         {insert_scripts files='utils.js,user.js'}
         <script type="text/javascript">

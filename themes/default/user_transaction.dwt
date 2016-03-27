@@ -178,24 +178,50 @@
        <!-- {if $action eq 'order_list'} -->
        <h5><span>{$lang.label_order}</span></h5>
        <div class="blank"></div>
-       <table width="100%" border="0" cellpadding="5" cellspacing="1" bgcolor="#dddddd">
-          <tr align="center">
-            <td bgcolor="#ffffff">{$lang.order_number}</td>
-            <td bgcolor="#ffffff">{$lang.order_addtime}</td>
-            <td bgcolor="#ffffff">{$lang.order_money}</td>
-            <td bgcolor="#ffffff">{$lang.order_status}</td>
-            <td bgcolor="#ffffff">{$lang.handle}</td>
+        <table class="order_table"><!--lxd modify-->
+         <tr align="center">
+            <th>订单信息</th>
+            <th>单价(元)</th>
+            <th>数量</th>
+            <th>收货人</th>
+            <th>{$lang.order_money}</th>
+            <th>{$lang.order_status}</th>
+            <th>{$lang.handle}</th>
           </tr>
           <!--{foreach from=$orders item=item}-->
-          <tr>
-            <td align="center" bgcolor="#ffffff"><a href="user.php?act=order_detail&order_id={$item.order_id}" class="f6">{$item.order_sn}</a></td>
-            <td align="center" bgcolor="#ffffff">{$item.order_time}</td>
-            <td align="right" bgcolor="#ffffff">{$item.total_fee}</td>
-            <td align="center" bgcolor="#ffffff">{$item.order_status}</td>
-            <td align="center" bgcolor="#ffffff"><font class="f6">{$item.handler}</font></td>
+          <tr class="order_info">
+            <td colspan="7">
+              <span>{$lang.order_number}:<a href="user.php?act=order_detail&order_id={$item.order_id}" class="f6">{$item.order_sn}</a></span>
+                <span>商家店铺：{if $item.store}<a href="seller_store.php?sid={$item.store.id}" target="_blank">{$item.store.shop_name}</a>{else}网站自营{/if}</span>
+                <span>提交时间：{$item.order_time}</span>
+            </td>
+          </tr>
+          <tr class="order_item">
+            <td width="240" align="left">
+            {foreach from=$item.goods_list item=goods}
+              <div class="order_goods">
+                  <a href="goods.php?id={$goods.goods_id}" target="_blank" class="order_goods_img"><img src="{$goods.goods_thumb}" class="order_goods_item" /></a>
+                    <a href="goods.php?id={$goods.goods_id}" target="_blank">{$goods.goods_name}</a>
+                </div>
+           {/foreach}
+            </td>
+            <td width="100">
+            {foreach from=$item.goods_list item=goods}
+              <div class="order_num_price">{$goods.goods_price}</div>
+            {/foreach}
+            </td>
+            <td width="80">
+            {foreach from=$item.goods_list item=goods}
+              <div class="order_number">{$goods.goods_number}</div>
+            {/foreach}
+            </td>
+            <td width="80"><div class="u_name">{$item.consignee}</div></td>
+            <td width="90" class="price"><div class="u_price">{$item.total_fee}</div></td>
+            <td width="100"><div class="u_status">{$item.order_status}</div></td>
+            <td width="110"><div class="u_handler">{$item.handler}</div></td>
           </tr>
           <!--{/foreach}-->
-          </table>
+       </table>
         <div class="blank5"></div>
        <!-- #BeginLibraryItem "/library/pages.lbi" --><!-- #EndLibraryItem -->
        <div class="blank5"></div>

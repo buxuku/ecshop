@@ -400,6 +400,7 @@
       <tr>
         <td align="right" bgcolor="#ffffff">&nbsp;</td>
         <td bgcolor="#ffffff"><input name="act" type="hidden" value="act_add_booking" />
+        <input name="s_id" type="hidden" value="{$info.seller_id}" />
           <input name="id" type="hidden" value="{$info.id}" />
           <input name="rec_id" type="hidden" value="{$info.rec_id}" />
           <input type="submit" name="submit" class="submit" value="{$lang.submit_booking_goods}" />
