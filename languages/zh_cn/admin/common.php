@@ -130,6 +130,16 @@ $_LANG['kilogram'] = '千克';
 
 /* 菜单分类部分 */
 $_LANG['02_cat_and_goods'] = '商品管理';
+//lxd 商家入驻 start
+$_LANG['02_seller_manage'] ='入驻商家管理';
+$_LANG['seller_list'] = '入驻商家列表';
+$_LANG['021_seller_fields'] = '商家注册项设置';
+$_LANG['seller_yongjin'] = '佣金列表';
+$_LANG['store_category']='商家店铺分类';
+$_LANG['store_manege']='商家店铺管理';
+$_LANG['street_tags_manege']='店铺街标签管理';
+//lxd 商家入驻 end
+
 $_LANG['03_promotion'] = '促销管理';
 $_LANG['04_order'] = '订单管理';
 $_LANG['05_banner'] = '广告管理';

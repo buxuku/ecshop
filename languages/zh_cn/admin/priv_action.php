@@ -43,6 +43,9 @@ $_LANG['goods_export'] = '商品批量导出';
 $_LANG['goods_batch'] = '商品批量上传/修改';
 $_LANG['gen_goods_script'] = '生成商品代码';
 $_LANG['suppliers_goods'] = '供货商商品管理';
+/*lxd 商家入驻*/
+$_LANG['check']='审核商家商品';
+/*lxd 商家入驻*/
 
 //文章管理部分的权限
 $_LANG['article_cat'] = '文章分类管理';
@@ -61,6 +64,15 @@ $_LANG['user_rank'] = '会员等级管理';
 $_LANG['feedback_priv'] = '会员留言管理';
 $_LANG['surplus_manage'] = '会员余额管理';
 $_LANG['account_manage'] = '会员账户管理';
+//lxd 商家入驻 start
+$_LANG['seller_manage'] = '入驻商家管理';
+$_LANG['seller_fields'] = '商家注册项管理'; //lxd 商家入驻
+$_LANG['seller_list'] = '入驻商家信息管理';// lxd 商家入驻
+$_LANG['seller_yj_manage'] = '商家佣金管理'; //lxd 商家入驻
+$_LANG['store_cate_manage']='商家店铺分类管理';
+$_LANG['store_manege']='商家店铺管理';
+$_LANG['street_tags_manege']='店铺街标签管理';
+//lxd 商家入驻 end
 
 //权限管理部分的权限
 $_LANG['admin_manage'] = '管理员添加/编辑';
