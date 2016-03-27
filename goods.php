@@ -186,6 +186,19 @@ if (!$smarty->is_cached('goods.dwt', $cache_id))
                 $goods['bonus_money'] = price_format($goods['bonus_money']);
             }
         }
+//lxd 商家入驻获取商品的店家信息
+        if($goods)
+        {
+            $store_info=$db->getRow("select * from ".$ecs->table('seller_shopinfo')." where seller_id='".$goods['seller_id']."'");
+            if($store_info)
+            {
+                $sql = 'SELECT region_name FROM ' . $GLOBALS['ecs']->table('region') ." WHERE region_id in(".$store_info['province'].",".$store_info['city'].") order by region_id Asc";
+                $address=$GLOBALS['db']->getCol($sql);
+                $store_info['address']=$address[0].$address[1];
+                $store_info['shop_logo']=str_replace('../','./',$store_info['shop_logo']);
+            }
+            $smarty->assign('store',$store_info);
+        }
 
         $smarty->assign('goods',              $goods);
         $smarty->assign('goods_id',           $goods['goods_id']);

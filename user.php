@@ -804,6 +804,17 @@ elseif ($action == 'order_list')
     $pager  = get_pager('user.php', array('act' => $action), $record_count, $page);
 
     $orders = get_user_orders($user_id, $pager['size'], $pager['start']);
+    //lxd 商家入驻 获得订单商品
+    foreach($orders as $key=>$val)
+    {
+        //获得店铺信息
+        $orders[$key]['store']=$db->getRow("select id,shop_name from ".$ecs->table('seller_shopinfo')." where seller_id='".$val['seller_id']."'");
+        //获取订单商品信息
+        $sql="select g.goods_thumb,og.goods_id,og.goods_name,og.goods_price,og.goods_number from ".$ecs->table('order_goods')." as og left join ".$ecs->table('goods')." as g on g.goods_id=og.goods_id where og.order_id='".$val[order_id]."'";
+        $orders[$key]['goods_list']=$db->getAll($sql);
+        
+    }
+
     $merge  = get_user_merge($user_id);
 
     $smarty->assign('merge',  $merge);
@@ -1249,7 +1260,8 @@ elseif ($action == 'act_add_booking')
         'linkman'      => isset($_POST['linkman']) ? trim($_POST['linkman'])  : '',
         'email'        => isset($_POST['email'])   ? trim($_POST['email'])    : '',
         'tel'          => isset($_POST['tel'])     ? trim($_POST['tel'])      : '',
-        'booking_id'   => isset($_POST['rec_id'])  ? intval($_POST['rec_id']) : 0
+        'booking_id'   => isset($_POST['rec_id'])  ? intval($_POST['rec_id']) : 0,
+        'seller_id'    => isset($_POST['s_id'])  ? intval($_POST['s_id']) : 0 //lxd 商家入驻
     );
 
     // 查看此商品是否已经登记过
